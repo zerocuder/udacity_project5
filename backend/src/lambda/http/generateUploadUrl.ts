@@ -4,11 +4,9 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors, httpErrorHandler } from 'middy/middlewares'
 
-//import { createAttachmentPresignedUrl } from '../../businessLogic/todos'
 import { getUserId } from '../utils'
-
 import { createLogger } from '../../utils/logger'
-import { TodoAccess } from '../../dataLayer/todosAccess'
+import { PhotoAccess } from '../../dataLayer/photosAccess'
 
 import * as AWS from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
@@ -23,28 +21,27 @@ const s3 = new XAWS.S3({
 const bucketName = process.env.S3_BUCKET
 const urlExpiration = Number(process.env.SIGNED_URL_EXPIRATION)
 
-const todoAccess = new TodoAccess()
+const photoAccess = new PhotoAccess()
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    const todoId = event.pathParameters.todoId
-    // TODO: Return a presigned URL to upload a file for a TODO item with the provided id
+    const photoId = event.pathParameters.todoId
     logger.info('Generating upload URL:', {
-      todoId
+      photoId
     })
     const userId = getUserId(event)
 
     const uploadUrl = s3.getSignedUrl('putObject', {
       Bucket: bucketName,
-      Key: todoId,
+      Key: photoId,
       Expires: urlExpiration
     })
     logger.info('Generating upload URL:', {
-      todoId,
+      photoId,
       uploadUrl
     })
 
-    await todoAccess.saveImgUrl(userId, todoId, bucketName)
+    await photoAccess.saveImgUrl(userId, photoId, bucketName)
 
     return {
       statusCode: 201,

@@ -4,24 +4,23 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors, httpErrorHandler } from 'middy/middlewares'
 
-import { updateTodo } from '../../businessLogic/todos'
-import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
+import { editPhoto } from '../../businessLogic/photos'
 import { getUserId } from '../utils'
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    const todoId = event.pathParameters.todoId
-    const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
-    // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
+    const photoId = event.pathParameters.todoId
+    const caption: string = JSON.parse(event.body)
     const userId = getUserId(event)
-    const todo = await updateTodo(userId, todoId, updatedTodo)
+    const photo = await editPhoto(userId, photoId, caption)
+
     return {
       statusCode: 200,
       headers: {
         'Access-Control-Allow-Origin': '*',
         "Access-Control-Allow-Credentials": true,
       },
-      body: JSON.stringify(todo)
+      body: JSON.stringify(photo)
     }
   }
 )

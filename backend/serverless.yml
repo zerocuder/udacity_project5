@@ -1,14 +1,12 @@
-# TODO: Change the name of the org 
 org: zerocuder
-app: serverless-todo-app
-service: serverless-todo-app-service
+app: capstone-serverless-photo-app
+service: capstone-serverless-photo-service
 #frameworkVersion: '3.32.0'
 
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
   - serverless-plugin-tracing
-  #- serverless-offline
 
 provider:
   name: aws
@@ -25,9 +23,9 @@ provider:
   # Use these variables in the functions and resouorces section below. For example, 
   # ${self:provider.environment.ATTACHMENT_S3_BUCKET}
   environment:
-    TODOS_TABLE: Todos-${self:provider.stage}
-    TODOS_CREATED_AT_INDEX: CreatedAtIndex
-    S3_BUCKET: bucket267208235270-serverless-${self:provider.stage}
+    PHOTOS_TABLE: Photos-${self:provider.stage}
+    PHOTOS_CREATED_AT_INDEX: CreatedAtIndex
+    S3_BUCKET: bucket267208235270-capstone-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
 
   logs:
@@ -35,95 +33,81 @@ provider:
     restApi: true
 
 functions:
-
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
 
-  # TODO: Configure this function - 
-  # Provide iamRoleStatements property for performing Actions on DynamoDB
-  GetTodos:
-    handler: src/lambda/http/getTodos.handler
+  GetPhotos:
+    handler: src/lambda/http/getPhotos.handler
     events:
       - http:
           method: get
-          path: todos
+          path: photos
           cors: true
           authorizer: Auth
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:Query
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PHOTOS_TABLE}
       - Effect: Allow
         Action:
           - dynamodb:Query
           - dynamodb:Scan
           - dynamodb:GetItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_CREATED_AT_INDEX}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PHOTOS_TABLE}/index/${self:provider.environment.PHOTOS_CREATED_AT_INDEX}
       - Effect: Allow
         Action:
           - xray:PutTelemetryRecords
           - xray:PutTraceSegments
         Resource: '*'
-  # TODO: Configure this function - 
-  # Provide iamRoleStatements property. Decide the Actions and AWS Resource. 
-  # To refer to an AWS resource defined in the "Resources" section, you can use "Resource: !GetAtt <resource-name>.Arn"
-  # To validate incoming HTTP requests, we have provided the request schemas in function definition below. 
-  CreateTodo:
-    handler: src/lambda/http/createTodo.handler
+
+  AddPhoto:
+    handler: src/lambda/http/addPhoto.handler
     events:
       - http:
           method: post
-          path: todos
+          path: photos
           cors: true
           authorizer: Auth
-          request:
-            schemas:
-              application/json: ${file(models/create-todo-model.json)}
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:PutItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PHOTOS_TABLE}
       - Effect: Allow
         Action:
           - xray:PutTraceSegments
         Resource:
           - '*'
-  # TODO: Configure this function
-  # Provide property for setting up CORS, Authorizer, iamRoleStatements, and request schemas
-  UpdateTodo:
-    handler: src/lambda/http/updateTodo.handler
+
+  EditPhoto:
+    handler: src/lambda/http/editPhoto.handler
     events:
       - http:
           method: patch
-          path: todos/{todoId}
+          path: photos/{photoId}
           cors: true
           authorizer: Auth
-          documentation:
-            summary: Update a new todo
-            description: Update a new todo
-            requestModels:
-              "application/json": UpdateTodoRequest
-          reqValidatorName: RequestBodyValidator
+          request:
+            schemas:
+              application/json: ${file(models/edit-photo-model.json)}
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:UpdateItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PHOTOS_TABLE}
       - Effect: Allow
         Action:
           - xray:PutTraceSegments
         Resource:
           - '*'
-  # TODO: Configure this function
-  # Provide property for setting up CORS, Authorizer, iamRoleStatements
-  DeleteTodo:
-    handler: src/lambda/http/deleteTodo.handler
+
+  DeletePhoto:
+    handler: src/lambda/http/deletePhoto.handler
     events:
       - http:
           method: delete
-          path: todos/{todoId}
+          path: photos/{photoId}
           cors: true
           authorizer: Auth
     iamRoleStatements:
@@ -131,43 +115,15 @@ functions:
         Action:
           - dynamodb:deleteItem
         Resource:
-          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PHOTOS_TABLE}
       - Effect: Allow
         Action:
           - xray:PutTraceSegments
         Resource:
           - '*'
-  # TODO: Configure this function
-  # Provide property for setting up CORS, Authorizer, iamRoleStatements
-  GenerateUploadUrl:
-    handler: src/lambda/http/generateUploadUrl.handler
-    events:
-      - http:
-          method: post
-          path: todos/{todoId}/attachment
-          cors: true
-          authorizer: Auth
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - s3:PutObject
-          - s3:GetObject
-        Resource: arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*
-      - Effect: Allow
-        Action:
-          - dynamodb:updateItem
-        Resource:
-          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
-      - Effect: Allow
-        Action:
-          - xray:PutTraceSegments
-        Resource:
-          - '*'
+
 resources:
   Resources:
-    # Add necessary AWS resources. You will need at least the following AWS resources
-    # TODO: Fill the properties
-    # Feel free to change the names as you like. 
     GatewayResponseDefault4XX:
       Type: AWS::ApiGateway::GatewayResponse
       Properties:
@@ -178,26 +134,26 @@ resources:
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: ApiGatewayRestApi    
-    # TODO: Create a DynamoDB table with local secondary index and a composite key
-    TodosTable:
+
+    PhotosTable:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
-          - AttributeName: todoId
+          - AttributeName: photoId
             AttributeType: S
           - AttributeName: createdAt
             AttributeType: S
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
-          - AttributeName: todoId
+          - AttributeName: photoId
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
-        TableName: ${self:provider.environment.TODOS_TABLE}
+        TableName: ${self:provider.environment.PHOTOS_TABLE}
         LocalSecondaryIndexes:
-          - IndexName: ${self:provider.environment.TODOS_CREATED_AT_INDEX}
+          - IndexName: ${self:provider.environment.PHOTOS_CREATED_AT_INDEX}
             KeySchema:
               - AttributeName: userId
                 KeyType: HASH
@@ -205,8 +161,7 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
-    # TODO: Complete the bucket properties below. 
-    # Do not forget to add the CorsConfiguration propoerty
+
     AttachmentsBucket:
       Type: AWS::S3::Bucket
       Properties:
@@ -229,13 +184,12 @@ resources:
           BlockPublicPolicy: false
           IgnorePublicAcls: false
           RestrictPublicBuckets: false
-    # TODO: Complete the policy below and attach it to the bucket defined above
-    # For cross referencing the name of the bucket, use "!Ref AttachmentsBucket"
+
     BucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
         PolicyDocument:
-          Id: UdacityServerlessTodo
+          Id: UdacityServerlessPhoto
           Version: '2012-10-17'
           Statement:
             - Sid: PublicReadForGetBucketObjects
@@ -244,12 +198,3 @@ resources:
               Action: 's3:GetObject'
               Resource: 'arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*'
         Bucket: !Ref AttachmentsBucket
-
-    RequestBodyValidator:
-      Type: AWS::ApiGateway::RequestValidator
-      Properties:
-        Name: "request-body-validator"
-        RestApiId:
-          Ref: ApiGatewayRestApi
-        ValidateRequestBody: true
-        ValidateRequestParameters: false
