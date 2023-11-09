@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Form, Button } from 'semantic-ui-react'
 import Auth from '../auth/Auth'
 import { getUploadUrl, uploadFile } from '../api/photos-api'
+import { createPhoto, deletePhoto, getPhotos, patchPhoto } from '../api/photos-api'
 
 enum UploadState {
   NoUpload,
@@ -9,7 +10,7 @@ enum UploadState {
   UploadingFile,
 }
 
-interface EditPhotoProps {
+interface AddPhotoProps {
   match: {
     params: {
       photoId: string
@@ -18,18 +19,24 @@ interface EditPhotoProps {
   auth: Auth
 }
 
-interface EditPhotoState {
+interface AddPhotoState {
+  caption: string
   file: any
   uploadState: UploadState
 }
 
-export class EditPhoto extends React.PureComponent<
-  EditPhotoProps,
-  EditPhotoState
+export class AddPhoto extends React.PureComponent<
+  AddPhotoProps,
+  AddPhotoState
 > {
-  state: EditPhotoState = {
+  state: AddPhotoState = {
+    caption: '',
     file: undefined,
     uploadState: UploadState.NoUpload
+  }
+
+  handleCaptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ caption: event.target.value })
   }
 
   handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,20 +52,27 @@ export class EditPhoto extends React.PureComponent<
     event.preventDefault()
 
     try {
+      if(this.state.caption.length < 5) {
+        alert('Caption should be greater than 5 char')
+        return
+      }
+
       if (!this.state.file) {
         alert('File should be selected')
         return
       }
 
+      const newPhoto = await createPhoto(this.props.auth.getIdToken(), this.state.caption)
+
       this.setUploadState(UploadState.FetchingPresignedUrl)
-      const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.photoId)
+      const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), newPhoto.photoId)
 
       this.setUploadState(UploadState.UploadingFile)
       await uploadFile(uploadUrl, this.state.file)
 
       alert('File was uploaded!')
     } catch (e) {
-      alert('Could not upload a file: ' + (e as Error).message)
+      alert('Add new photo error: ' + (e as Error).message)
     } finally {
       this.setUploadState(UploadState.NoUpload)
     }
@@ -73,9 +87,18 @@ export class EditPhoto extends React.PureComponent<
   render() {
     return (
       <div>
-        <h1>Update photo</h1>
+        <h1>Add new photo</h1>
 
         <Form onSubmit={this.handleSubmit}>
+          <Form.Field>
+            <label>Caption</label>
+            <input
+              name="caption"
+              type="text"
+              placeholder="Photo caption"
+              onChange={this.handleCaptionChange}
+            />
+          </Form.Field>
           <Form.Field>
             <label>File</label>
             <input
@@ -102,7 +125,7 @@ export class EditPhoto extends React.PureComponent<
           loading={this.state.uploadState !== UploadState.NoUpload}
           type="submit"
         >
-          Upload
+          Submit
         </Button>
       </div>
     )

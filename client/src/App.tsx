@@ -4,6 +4,7 @@ import { Grid, Menu, Segment } from 'semantic-ui-react'
 
 import Auth from './auth/Auth'
 import { EditPhoto } from './components/EditPhoto'
+import { AddPhoto } from './components/AddPhoto'
 import { LogIn } from './components/LogIn'
 import { NotFound } from './components/NotFound'
 import { Photos } from './components/Photos'
@@ -94,6 +95,14 @@ export default class App extends Component<AppProps, AppState> {
           exact
           render={props => {
             return <Photos {...props} auth={this.props.auth} />
+          }}
+        />
+
+        <Route
+          path="/photos/add"
+          exact
+          render={props => {
+            return <AddPhoto {...props} auth={this.props.auth} />
           }}
         />
 

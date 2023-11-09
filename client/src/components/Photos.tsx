@@ -44,6 +44,10 @@ export class Photos extends React.PureComponent<PhotosProps, PhotosState> {
     this.props.history.push(`/photos/${photoId}/edit`)
   }
 
+  onAddButtonClick = () => {
+    this.props.history.push(`/photos/add`)
+  }
+
   onPhotoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
     try {
       const dueDate = this.calculateDueDate()
@@ -97,10 +101,9 @@ export class Photos extends React.PureComponent<PhotosProps, PhotosState> {
   render() {
     return (
       <div>
-        <Header as="h1">PHOTOs</Header>
-
         {this.renderAddPhotoInput()}
-
+        <Header as="h1">PHOTOs</Header>
+  
         {this.renderPhotos()}
       </div>
     )
@@ -110,19 +113,14 @@ export class Photos extends React.PureComponent<PhotosProps, PhotosState> {
     return (
       <Grid.Row>
         <Grid.Column width={16}>
-          <Input
-            action={{
-              color: 'teal',
-              labelPosition: 'left',
-              icon: 'add',
-              content: 'Add Photo',
-              onClick: this.onPhotoCreate
-            }}
-            fluid
-            actionPosition="left"
-            placeholder="Enter photo caption..."
-            onChange={this.handleNameChange}
-          />
+          <Button
+            label="Add new photo"
+            labelPosition='right'
+            color="blue"
+            onClick={() => this.onAddButtonClick()}
+          >
+            <Icon name="add square"/>
+          </Button>
         </Grid.Column>
         <Grid.Column width={16}>
           <Divider />
