@@ -3,13 +3,13 @@
   "title": "group",
   "type": "object",
   "properties": {
-      "photoName": {
+      "caption": {
           "type": "string",
           "minLength": 5
       }
   },
   "required": [
-      "photoName"
+      "caption"
   ],
   "additionalProperties": false
 }

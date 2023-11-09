@@ -14,106 +14,99 @@ import {
   Loader
 } from 'semantic-ui-react'
 
-import { createTodo, deleteTodo, getTodos, patchTodo } from '../api/todos-api'
+import { createPhoto, deletePhoto, getPhotos, patchPhoto } from '../api/photos-api'
 import Auth from '../auth/Auth'
-import { Todo } from '../types/Todo'
+import { Photo } from '../types/Photo'
 
-interface TodosProps {
+interface PhotosProps {
   auth: Auth
   history: History
 }
 
-interface TodosState {
-  todos: Todo[]
-  newTodoName: string
-  loadingTodos: boolean
+interface PhotosState {
+  photos: Photo[]
+  newPhotoCaption: string
+  loadingPhotos: boolean
 }
 
-export class Todos extends React.PureComponent<TodosProps, TodosState> {
-  state: TodosState = {
-    todos: [],
-    newTodoName: '',
-    loadingTodos: true
+export class Photos extends React.PureComponent<PhotosProps, PhotosState> {
+  state: PhotosState = {
+    photos: [],
+    newPhotoCaption: '',
+    loadingPhotos: true
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ newTodoName: event.target.value })
+    this.setState({ newPhotoCaption: event.target.value })
   }
 
-  onEditButtonClick = (todoId: string) => {
-    this.props.history.push(`/todos/${todoId}/edit`)
+  onEditButtonClick = (photoId: string) => {
+    this.props.history.push(`/photos/${photoId}/edit`)
   }
 
-  onTodoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
+  onPhotoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
     try {
       const dueDate = this.calculateDueDate()
-      const newTodo = await createTodo(this.props.auth.getIdToken(), {
-        name: this.state.newTodoName,
-        dueDate
-      })
+      const newPhoto = await createPhoto(this.props.auth.getIdToken(), this.state.newPhotoCaption)
       this.setState({
-        todos: [...this.state.todos, newTodo],
-        newTodoName: ''
+        photos: [...this.state.photos, newPhoto],
+        newPhotoCaption: ''
       })
     } catch {
-      alert('Todo creation failed')
+      alert('Photo creation failed')
     }
   }
 
-  onTodoDelete = async (todoId: string) => {
+  onPhotoDelete = async (photoId: string) => {
     try {
-      await deleteTodo(this.props.auth.getIdToken(), todoId)
+      await deletePhoto(this.props.auth.getIdToken(), photoId)
       this.setState({
-        todos: this.state.todos.filter(todo => todo.todoId !== todoId)
+        photos: this.state.photos.filter(photo => photo.photoId !== photoId)
       })
     } catch {
-      alert('Todo deletion failed')
+      alert('Photo deletion failed')
     }
   }
 
-  onTodoCheck = async (pos: number) => {
+  onPhotoCheck = async (pos: number) => {
     try {
-      const todo = this.state.todos[pos]
-      await patchTodo(this.props.auth.getIdToken(), todo.todoId, {
-        name: todo.name,
-        dueDate: todo.dueDate,
-        done: !todo.done
-      })
+      const photo = this.state.photos[pos]
+      await patchPhoto(this.props.auth.getIdToken(), photo.photoId, photo.caption)
       this.setState({
-        todos: update(this.state.todos, {
-          [pos]: { done: { $set: !todo.done } }
+        photos: update(this.state.photos, {
+          [pos]: { caption: { $set: photo.caption } }
         })
       })
     } catch {
-      alert('Todo deletion failed')
+      alert('Photo deletion failed')
     }
   }
 
   async componentDidMount() {
     try {
-      const todos = await getTodos(this.props.auth.getIdToken())
+      const photos = await getPhotos(this.props.auth.getIdToken())
       this.setState({
-        todos,
-        loadingTodos: false
+        photos: photos,
+        loadingPhotos: false
       })
     } catch (e) {
-      alert(`Failed to fetch todos: ${(e as Error).message}`)
+      alert(`Failed to fetch photos: ${(e as Error).message}`)
     }
   }
 
   render() {
     return (
       <div>
-        <Header as="h1">TODOs</Header>
+        <Header as="h1">PHOTOs</Header>
 
-        {this.renderCreateTodoInput()}
+        {this.renderAddPhotoInput()}
 
-        {this.renderTodos()}
+        {this.renderPhotos()}
       </div>
     )
   }
 
-  renderCreateTodoInput() {
+  renderAddPhotoInput() {
     return (
       <Grid.Row>
         <Grid.Column width={16}>
@@ -122,12 +115,12 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
               color: 'teal',
               labelPosition: 'left',
               icon: 'add',
-              content: 'New task',
-              onClick: this.onTodoCreate
+              content: 'Add Photo',
+              onClick: this.onPhotoCreate
             }}
             fluid
             actionPosition="left"
-            placeholder="To change the world..."
+            placeholder="Enter photo caption..."
             onChange={this.handleNameChange}
           />
         </Grid.Column>
@@ -138,47 +131,47 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     )
   }
 
-  renderTodos() {
-    if (this.state.loadingTodos) {
+  renderPhotos() {
+    if (this.state.loadingPhotos) {
       return this.renderLoading()
     }
 
-    return this.renderTodosList()
+    return this.renderPhotosList()
   }
 
   renderLoading() {
     return (
       <Grid.Row>
         <Loader indeterminate active inline="centered">
-          Loading TODOs
+          Loading PHOTOs
         </Loader>
       </Grid.Row>
     )
   }
 
-  renderTodosList() {
+  renderPhotosList() {
     return (
       <Grid padded>
-        {this.state.todos.map((todo, pos) => {
+        {this.state.photos.map((photo, pos) => {
           return (
-            <Grid.Row key={todo.todoId}>
-              <Grid.Column width={1} verticalAlign="middle">
+            <Grid.Row key={photo.photoId}>
+              {/* <Grid.Column width={1} verticalAlign="middle">
                 <Checkbox
-                  onChange={() => this.onTodoCheck(pos)}
-                  checked={todo.done}
+                  onChange={() => this.onPhotoCheck(pos)}
+                  checked={false}
                 />
-              </Grid.Column>
+              </Grid.Column> */}
               <Grid.Column width={10} verticalAlign="middle">
-                {todo.name}
+                {photo.caption}
               </Grid.Column>
               <Grid.Column width={3} floated="right">
-                {todo.dueDate}
+                {photo.createdAt}
               </Grid.Column>
               <Grid.Column width={1} floated="right">
                 <Button
                   icon
                   color="blue"
-                  onClick={() => this.onEditButtonClick(todo.todoId)}
+                  onClick={() => this.onEditButtonClick(photo.photoId)}
                 >
                   <Icon name="pencil" />
                 </Button>
@@ -187,13 +180,13 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
                 <Button
                   icon
                   color="red"
-                  onClick={() => this.onTodoDelete(todo.todoId)}
+                  onClick={() => this.onPhotoDelete(photo.photoId)}
                 >
                   <Icon name="delete" />
                 </Button>
               </Grid.Column>
-              {todo.attachmentUrl && (
-                <Image src={todo.attachmentUrl} size="small" wrapped />
+              {photo.photoUrl && (
+                <Image src={photo.photoUrl} size="small" wrapped />
               )}
               <Grid.Column width={16}>
                 <Divider />

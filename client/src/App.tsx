@@ -3,10 +3,10 @@ import { Link, Route, Router, Switch } from 'react-router-dom'
 import { Grid, Menu, Segment } from 'semantic-ui-react'
 
 import Auth from './auth/Auth'
-import { EditTodo } from './components/EditTodo'
+import { EditPhoto } from './components/EditPhoto'
 import { LogIn } from './components/LogIn'
 import { NotFound } from './components/NotFound'
-import { Todos } from './components/Todos'
+import { Photos } from './components/Photos'
 
 export interface AppProps {}
 
@@ -60,7 +60,8 @@ export default class App extends Component<AppProps, AppState> {
           <Link to="/">Home</Link>
         </Menu.Item>
 
-        <Menu.Menu position="right">{this.logInLogOutButton()}</Menu.Menu>
+        <Menu.Menu position="right"><Menu.Item>Hi! user</Menu.Item></Menu.Menu>
+        <Menu.Menu >{this.logInLogOutButton()}</Menu.Menu>
       </Menu>
     )
   }
@@ -92,15 +93,15 @@ export default class App extends Component<AppProps, AppState> {
           path="/"
           exact
           render={props => {
-            return <Todos {...props} auth={this.props.auth} />
+            return <Photos {...props} auth={this.props.auth} />
           }}
         />
 
         <Route
-          path="/todos/:todoId/edit"
+          path="/photos/:photoId/edit"
           exact
           render={props => {
-            return <EditTodo {...props} auth={this.props.auth} />
+            return <EditPhoto {...props} auth={this.props.auth} />
           }}
         />
 

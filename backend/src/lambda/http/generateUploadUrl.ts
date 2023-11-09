@@ -25,7 +25,7 @@ const photoAccess = new PhotoAccess()
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    const photoId = event.pathParameters.todoId
+    const photoId = event.pathParameters.photoId
     logger.info('Generating upload URL:', {
       photoId
     })

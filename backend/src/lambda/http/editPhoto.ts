@@ -9,7 +9,7 @@ import { getUserId } from '../utils'
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    const photoId = event.pathParameters.todoId
+    const photoId = event.pathParameters.photoId
     const caption: string = JSON.parse(event.body)
     const userId = getUserId(event)
     const photo = await editPhoto(userId, photoId, caption)

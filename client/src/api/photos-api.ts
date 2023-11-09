@@ -1,27 +1,25 @@
 import { apiEndpoint } from '../config'
-import { Todo } from '../types/Todo';
-import { CreateTodoRequest } from '../types/CreateTodoRequest';
+import { Photo } from '../types/Photo';
 import Axios from 'axios'
-import { UpdateTodoRequest } from '../types/UpdateTodoRequest';
 
-export async function getTodos(idToken: string): Promise<Todo[]> {
-  console.log('Fetching todos')
+export async function getPhotos(idToken: string): Promise<Photo[]> {
+  console.log('Fetching photos')
 
-  const response = await Axios.get(`${apiEndpoint}/todos`, {
+  const response = await Axios.get(`${apiEndpoint}/photos`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`
     },
   })
-  console.log('Todos:', response.data)
+  console.log('Photos:', response.data)
   return response.data
 }
 
-export async function createTodo(
+export async function createPhoto(
   idToken: string,
-  newTodo: CreateTodoRequest
-): Promise<Todo> {
-  const response = await Axios.post(`${apiEndpoint}/todos`,  JSON.stringify(newTodo), {
+  newPhotoCaption: string
+): Promise<Photo> {
+  const response = await Axios.post(`${apiEndpoint}/photos`,  JSON.stringify(newPhotoCaption), {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`
@@ -30,12 +28,12 @@ export async function createTodo(
   return response.data
 }
 
-export async function patchTodo(
+export async function patchPhoto(
   idToken: string,
-  todoId: string,
-  updatedTodo: UpdateTodoRequest
+  photoId: string,
+  updatedPhotoCaption: string
 ): Promise<void> {
-  await Axios.patch(`${apiEndpoint}/todos/${todoId}`, JSON.stringify(updatedTodo), {
+  await Axios.patch(`${apiEndpoint}/photos/${photoId}`, JSON.stringify(updatedPhotoCaption), {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`
@@ -43,11 +41,11 @@ export async function patchTodo(
   })
 }
 
-export async function deleteTodo(
+export async function deletePhoto(
   idToken: string,
-  todoId: string
+  photoId: string
 ): Promise<void> {
-  await Axios.delete(`${apiEndpoint}/todos/${todoId}`, {
+  await Axios.delete(`${apiEndpoint}/photos/${photoId}`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`
@@ -57,9 +55,9 @@ export async function deleteTodo(
 
 export async function getUploadUrl(
   idToken: string,
-  todoId: string
+  photoId: string
 ): Promise<string> {
-  const response = await Axios.post(`${apiEndpoint}/todos/${todoId}/attachment`, '', {
+  const response = await Axios.post(`${apiEndpoint}/photos/${photoId}/attachment`, '', {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`
