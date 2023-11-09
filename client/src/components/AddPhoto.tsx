@@ -11,11 +11,6 @@ enum UploadState {
 }
 
 interface AddPhotoProps {
-  match: {
-    params: {
-      photoId: string
-    }
-  }
   auth: Auth
 }
 

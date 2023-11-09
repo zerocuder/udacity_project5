@@ -48,8 +48,24 @@ export default class App extends Component<AppProps, AppState> {
                 </Router>
               </Grid.Column>
             </Grid.Row>
+            <Grid.Row>
+              <Grid.Column width={16}>
+                {this.footer()}
+              </Grid.Column>
+            </Grid.Row>
           </Grid>
         </Segment>
+      </div>
+    )
+  }
+
+  footer() {
+    return (
+      <div style={{ textAlign: 'center', backgroundColor: 'rgba(0, 0, 0, 0.05)' }}>
+        Udagram: Cloud Capstone Project - 
+        <a className='text-reset fw-bold' href='.'>
+        NamLH20
+        </a>
       </div>
     )
   }
@@ -61,10 +77,15 @@ export default class App extends Component<AppProps, AppState> {
           <Link to="/">Home</Link>
         </Menu.Item>
 
-        <Menu.Menu position="right"><Menu.Item>Hi! user</Menu.Item></Menu.Menu>
+        <Menu.Menu position="right"><Menu.Item>{this.showGreeting()}</Menu.Item></Menu.Menu>
         <Menu.Menu >{this.logInLogOutButton()}</Menu.Menu>
       </Menu>
     )
+  }
+
+  showGreeting() {
+    var hour = new Date().getHours();
+    return ("Good " + (hour<12 && "Morning" || hour<18 && "Afternoon" || "Evening") + "!")
   }
 
   logInLogOutButton() {
