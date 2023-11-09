@@ -3,10 +3,11 @@ import { Link, Route, Router, Switch } from 'react-router-dom'
 import { Grid, Menu, Segment } from 'semantic-ui-react'
 
 import Auth from './auth/Auth'
-import { EditTodo } from './components/EditTodo'
+import { EditPhoto } from './components/EditPhoto'
+import { AddPhoto } from './components/AddPhoto'
 import { LogIn } from './components/LogIn'
 import { NotFound } from './components/NotFound'
-import { Todos } from './components/Todos'
+import { Photos } from './components/Photos'
 
 export interface AppProps {}
 
@@ -47,8 +48,24 @@ export default class App extends Component<AppProps, AppState> {
                 </Router>
               </Grid.Column>
             </Grid.Row>
+            <Grid.Row>
+              <Grid.Column width={16}>
+                {this.footer()}
+              </Grid.Column>
+            </Grid.Row>
           </Grid>
         </Segment>
+      </div>
+    )
+  }
+
+  footer() {
+    return (
+      <div style={{ textAlign: 'center', backgroundColor: 'rgba(0, 0, 0, 0.05)' }}>
+        Udagram: Cloud Capstone Project - 
+        <a className='text-reset fw-bold' href='.'>
+        NamLH20
+        </a>
       </div>
     )
   }
@@ -60,9 +77,15 @@ export default class App extends Component<AppProps, AppState> {
           <Link to="/">Home</Link>
         </Menu.Item>
 
-        <Menu.Menu position="right">{this.logInLogOutButton()}</Menu.Menu>
+        <Menu.Menu position="right"><Menu.Item>{this.showGreeting()}</Menu.Item></Menu.Menu>
+        <Menu.Menu >{this.logInLogOutButton()}</Menu.Menu>
       </Menu>
     )
+  }
+
+  showGreeting() {
+    var hour = new Date().getHours();
+    return ("Good " + (hour<12 && "Morning" || hour<18 && "Afternoon" || "Evening") + "!")
   }
 
   logInLogOutButton() {
@@ -92,15 +115,23 @@ export default class App extends Component<AppProps, AppState> {
           path="/"
           exact
           render={props => {
-            return <Todos {...props} auth={this.props.auth} />
+            return <Photos {...props} auth={this.props.auth} />
           }}
         />
 
         <Route
-          path="/todos/:todoId/edit"
+          path="/photos/add"
           exact
           render={props => {
-            return <EditTodo {...props} auth={this.props.auth} />
+            return <AddPhoto {...props} auth={this.props.auth} />
+          }}
+        />
+
+        <Route
+          path="/photos/:photoId/edit"
+          exact
+          render={props => {
+            return <EditPhoto {...props} auth={this.props.auth} />
           }}
         />
 
